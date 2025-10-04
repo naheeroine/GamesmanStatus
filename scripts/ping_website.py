@@ -1,9 +1,12 @@
-import time, urllib.request, urllib.error, json
+import time, urllib.request, urllib.error, json, ssl, certifi
 from pathlib import Path
+
+"""Ping the GamesmanUni homepage and write a status.json with operational/degraded/down + latency."""
 
 URL = "https://nyc.cs.berkeley.edu/uni/games"
 TIMEOUT_SECONDS = 3
 DEGRADED_MS = 2000
+CTX = ssl.create_default_context(cafile=certifi.where())
 
 def now_iso():
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -15,7 +18,7 @@ def main():
     note = ""
 
     try:
-        with urllib.request.urlopen(URL, timeout=TIMEOUT_SECONDS) as r:
+        with urllib.request.urlopen(URL, timeout=TIMEOUT_SECONDS, context=CTX) as r:
             body = r.read()
             latency_ms = int((time.time() - start) * 1000)
             ok = 200 <= r.status < 300
