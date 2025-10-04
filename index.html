@@ -16,6 +16,10 @@
     .left { display:flex; align-items:center; gap:10px; }
     .name { font-weight:600; }
     .meta { color: var(--muted); font-size:14px; }
+    .dot { width:12px; height:12px; border-radius:50%; }
+    .ok { background: var(--ok); }
+    .warn { background: var(--warn); }
+    .fail { background: var(--fail); }
     footer { text-align:center; color: var(--muted); padding: 20px; }
   </style>
 </head>
@@ -33,14 +37,15 @@
   </footer>
 
   <script>
+    const toBadge = s => s === 'operational' ? 'ok' : (s === 'degraded' ? 'warn' : 'fail');
+
     async function load() {
       try {
         const res = await fetch('data/status.json', { cache: 'no-store' });
         const data = await res.json();
 
         // banner
-        document.getElementById('banner').textContent =
-          data.summary || 'All systems operational';
+        document.getElementById('banner').textContent = data.summary || 'All systems operational';
 
         // rows
         const list = document.getElementById('list');
@@ -50,6 +55,7 @@
           row.className = 'row';
           row.innerHTML = `
             <div class="left">
+              <span class="dot ${toBadge(c.state)}"></span>
               <span class="name">${c.name || 'Component'}</span>
             </div>
             <div class="meta">
