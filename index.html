@@ -29,7 +29,16 @@
   </footer>
 
   <script>
-    // JS will go here
+    async function load() {
+      try {
+        const res = await fetch('data/status.json', { cache: 'no-store' });
+        const data = await res.json();
+        document.getElementById('banner').textContent = data.summary || 'All systems operational';
+      } catch (e) {
+        document.getElementById('banner').textContent = 'Could not load status.json';
+      }
+    }
+    load();
   </script>
 </body>
 </html>
