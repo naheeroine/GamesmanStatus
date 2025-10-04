@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>GamesmanStatus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root { --ok:#16a34a; --warn:#d97706; --fail:#dc2626; --fg:#0f172a; --muted:#475569; --bg:#f8fafc; }
     * { box-sizing: border-box; }
@@ -11,7 +12,7 @@
     header h1 { margin: 0 0 6px; font-size: 22px; }
     header p { margin: 0; color: var(--muted); }
     main { max-width: 900px; margin: 0 auto; padding: 24px; }
-    .banner { margin: 16px 24px; padding: 12px 14px; border-radius: 10px; background: #eef2ff; color:#1e3a8a; display:flex; align-items:center; gap:8px; }
+    .banner { margin: 16px 24px; padding: 12px 14px; border-radius: 10px; display:flex; align-items:center; gap:8px; }
     .row { display:flex; align-items:center; justify-content:space-between; background:white; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; margin-bottom:12px; }
     .left { display:flex; align-items:center; gap:10px; }
     .name { font-weight:600; }
@@ -40,15 +41,24 @@
     const toBadge = s => s === 'operational' ? 'ok' : (s === 'degraded' ? 'warn' : 'fail');
 
     async function load() {
+      const banner = document.getElementById('banner');
+      const list = document.getElementById('list');
+
       try {
         const res = await fetch('data/status.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
 
-        // banner
-        document.getElementById('banner').textContent = data.summary || 'All systems operational';
+        // Decide banner state from component states
+        const states = (data.components || []).map(c => c.state);
+        const anyFail = states.includes('down') || states.includes('outage') || states.includes('fail');
+        const anyWarn = states.includes('degraded') || states.includes('warn');
 
-        // rows
-        const list = document.getElementById('list');
+        banner.style.background = anyFail ? '#fee2e2' : (anyWarn ? '#fef3c7' : '#dcfce7');
+        banner.style.color = anyFail ? '#991b1b' : (anyWarn ? '#92400e' : '#065f46');
+        banner.textContent = data.summary || (anyFail ? 'Major outage' : (anyWarn ? 'Partial degradation' : 'All systems operational'));
+
+        // Render components
         list.innerHTML = '';
         (data.components || []).forEach(c => {
           const row = document.createElement('div');
@@ -65,9 +75,13 @@
         });
 
       } catch (e) {
-        document.getElementById('banner').textContent = 'Could not load status.json';
+        banner.style.background = '#fee2e2';
+        banner.style.color = '#991b1b';
+        banner.textContent = 'Could not load status.json';
+        list.innerHTML = '';
       }
     }
+
     load();
   </script>
 </body>
