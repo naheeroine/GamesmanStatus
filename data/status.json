@@ -1,1 +1,10 @@
-
+{
+  "generated_at": "2025-10-04T00:00:00Z",
+  "summary": "All systems operational",
+  "components": [
+    {"name":"Website (GamesmanUni)","state":"operational","latency_ms": 120,"last_checked":"2025-10-04T00:00:00Z"},
+    {"name":"UWAPI","state":"operational","latency_ms": 140,"last_checked":"2025-10-04T00:00:00Z"},
+    {"name":"Puzzles API","state":"operational","latency_ms": 95,"last_checked":"2025-10-04T00:00:00Z"},
+    {"name":"Solver (Representative)","state":"operational","latency_ms": 110,"last_checked":"2025-10-04T00:00:00Z"}
+  ]
+}
