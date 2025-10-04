@@ -1,0 +1,38 @@
+schedule:
+  every_minutes: 5
+  timeout_ms: 3000
+  degraded_latency_ms: 2000
+  consecutive_fail_threshold: 3
+
+checks:
+  - name: Website (GamesmanUni)
+    component: Website
+    type: external
+    url: https://nyc.cs.berkeley.edu/uni/games
+    expect:
+      status: 200
+      must_contain: "Games"
+
+  - name: UWAPI (4SquareTicTacToe meta)
+    component: UWAPI
+    type: external
+    url: https://nyc.cs.berkeley.edu/universal/v1/4squaretictactoe/regular/
+    expect:
+      status: 200
+      json_keys_any: ["id", "startPosition"]
+
+  - name: Puzzles Health
+    component: Puzzles API
+    type: health
+    url: https://nyc.cs.berkeley.edu/puzzles/health
+    expect:
+      status: 200
+      health_status_field: status   # "ok" | "degraded" | "fail"
+
+  - name: Tantrix Instructions
+    component: Solver (Representative)
+    type: external
+    url: https://nyc.cs.berkeley.edu/universal/v1/tantrix/3_0_0/instructions/?locale=en-US
+    expect:
+      status: 200
+      json_keys_any: ["instructions"]
