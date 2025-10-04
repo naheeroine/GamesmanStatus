@@ -12,6 +12,10 @@
     header p { margin: 0; color: var(--muted); }
     main { max-width: 900px; margin: 0 auto; padding: 24px; }
     .banner { margin: 16px 24px; padding: 12px 14px; border-radius: 10px; background: #eef2ff; color:#1e3a8a; display:flex; align-items:center; gap:8px; }
+    .row { display:flex; align-items:center; justify-content:space-between; background:white; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; margin-bottom:12px; }
+    .left { display:flex; align-items:center; gap:10px; }
+    .name { font-weight:600; }
+    .meta { color: var(--muted); font-size:14px; }
     footer { text-align:center; color: var(--muted); padding: 20px; }
   </style>
 </head>
@@ -33,7 +37,27 @@
       try {
         const res = await fetch('data/status.json', { cache: 'no-store' });
         const data = await res.json();
-        document.getElementById('banner').textContent = data.summary || 'All systems operational';
+
+        // banner
+        document.getElementById('banner').textContent =
+          data.summary || 'All systems operational';
+
+        // rows
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        (data.components || []).forEach(c => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML = `
+            <div class="left">
+              <span class="name">${c.name || 'Component'}</span>
+            </div>
+            <div class="meta">
+              ${c.state || 'unknown'} · ${typeof c.latency_ms==='number' ? c.latency_ms+' ms' : ''} · last checked ${c.last_checked || ''}
+            </div>`;
+          list.appendChild(row);
+        });
+
       } catch (e) {
         document.getElementById('banner').textContent = 'Could not load status.json';
       }
