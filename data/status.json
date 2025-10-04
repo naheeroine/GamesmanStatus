@@ -1,18 +1,30 @@
 {
-  "generated_at": "2025-10-04T05:08:16Z",
+  "generated_at": "2025-10-04T05:14:47Z",
   "summary": "All systems operational",
   "components": [
     {
       "name": "Website (GamesmanUni)",
       "state": "operational",
-      "latency_ms": 27,
-      "last_checked": "2025-10-04T05:08:16Z"
+      "latency_ms": 37,
+      "last_checked": "2025-10-04T05:14:47Z"
     },
     {
-      "name": "UWAPI",
+      "name": "UWAPI (4SquareTicTacToe meta)",
       "state": "operational",
-      "latency_ms": 121,
-      "last_checked": "2025-10-04T05:08:16Z"
+      "latency_ms": 48,
+      "last_checked": "2025-10-04T05:14:47Z"
+    },
+    {
+      "name": "Puzzles Health",
+      "state": "operational",
+      "latency_ms": 33,
+      "last_checked": "2025-10-04T05:14:47Z"
+    },
+    {
+      "name": "Tantrix Instructions",
+      "state": "operational",
+      "latency_ms": 72,
+      "last_checked": "2025-10-04T05:14:47Z"
     }
   ]
 }
