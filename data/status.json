@@ -1,12 +1,18 @@
 {
-  "generated_at": "2025-10-04T05:04:08Z",
+  "generated_at": "2025-10-04T05:08:16Z",
   "summary": "All systems operational",
   "components": [
     {
       "name": "Website (GamesmanUni)",
       "state": "operational",
-      "latency_ms": 29,
-      "last_checked": "2025-10-04T05:04:08Z"
+      "latency_ms": 27,
+      "last_checked": "2025-10-04T05:08:16Z"
+    },
+    {
+      "name": "UWAPI",
+      "state": "operational",
+      "latency_ms": 121,
+      "last_checked": "2025-10-04T05:08:16Z"
     }
   ]
 }
