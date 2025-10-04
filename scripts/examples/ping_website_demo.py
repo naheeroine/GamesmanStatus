@@ -1,7 +1,7 @@
-"""Ping the GamesmanUni homepage (and UWAPI meta) and write status.json with operational/degraded/down + latency."""
 import time, urllib.request, urllib.error, json, ssl, certifi
 from pathlib import Path
 
+# Tutorial-only example; production checks use scripts/run_checks.py
 # --- Probes ---
 WEBSITE_URL = "https://nyc.cs.berkeley.edu/uni/games"
 UWAPI_URL   = "https://nyc.cs.berkeley.edu/universal/v1/4squaretictactoe/regular/"
