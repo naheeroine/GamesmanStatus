@@ -1,35 +1,39 @@
 {
   "schema_version": 1,
-  "generated_at": "2025-10-08T01:36:57Z",
-  "summary": "All systems operational",
+  "generated_at": "2025-10-08T02:46:53Z",
+  "summary": "Partial degradation",
   "components": [
     {
       "name": "Website (GamesmanUni)",
       "url": "https://nyc.cs.berkeley.edu/uni/games",
-      "state": "operational",
-      "latency_ms": 439,
-      "last_checked": "2025-10-08T01:36:57Z"
+      "state": "degraded",
+      "latency_ms": 4705,
+      "last_checked": "2025-10-08T02:46:52Z",
+      "note": "slow response"
     },
     {
       "name": "UWAPI (4SquareTicTacToe meta)",
       "url": "https://nyc.cs.berkeley.edu/universal/v1/4squaretictactoe/regular/",
-      "state": "operational",
-      "latency_ms": 539,
-      "last_checked": "2025-10-08T01:36:57Z"
+      "state": "degraded",
+      "latency_ms": 4797,
+      "last_checked": "2025-10-08T02:46:52Z",
+      "note": "slow response"
     },
     {
       "name": "Puzzles Health",
       "url": "https://nyc.cs.berkeley.edu/puzzles/health",
-      "state": "operational",
-      "latency_ms": 440,
-      "last_checked": "2025-10-08T01:36:57Z"
+      "state": "degraded",
+      "latency_ms": 4702,
+      "last_checked": "2025-10-08T02:46:52Z",
+      "note": "slow response"
     },
     {
       "name": "Tantrix Instructions",
       "url": "https://nyc.cs.berkeley.edu/universal/v1/tantrix/3_0_0/instructions/?locale=en-US",
-      "state": "operational",
-      "latency_ms": 699,
-      "last_checked": "2025-10-08T01:36:57Z"
+      "state": "degraded",
+      "latency_ms": 4927,
+      "last_checked": "2025-10-08T02:46:53Z",
+      "note": "slow response"
     }
   ]
 }
