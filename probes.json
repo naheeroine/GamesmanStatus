@@ -1,0 +1,84 @@
+{
+  "probes": [
+    {
+      "id": "api-root",
+      "name": "Universal API Root",
+      "url": "https://nyc.cs.berkeley.edu/universal/v1/",
+      "type": "json",
+      "component": "API",
+      "group": "Core",
+      "sla_ms": 800,
+      "enabled": true,
+      "assert": {
+        "checks": [
+          { "kind": "http_status", "value": 200 },
+          { "kind": "json_is_array", "value": true },
+          { "kind": "json_min_length", "value": 20 },
+          { "kind": "json_first_has_keys", "keys": ["id", "name"] }
+        ]
+      }
+    },
+    {
+      "id": "homepage",
+      "name": "Homepage (SPA marker)",
+      "url": "https://nyc.cs.berkeley.edu/uni/",
+      "type": "html",
+      "component": "Frontend",
+      "group": "Core",
+      "sla_ms": 1500,
+      "enabled": true,
+      "assert": {
+        "checks": [
+          { "kind": "http_status", "value": 200 },
+          {
+            "kind": "html_contains_any",
+            "substrings": [
+              "GamesmanUni",
+              "doesn't work properly without JavaScript enabled"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "game-ttt",
+      "name": "Tic-Tac-Toe (start position)",
+      "url": "https://nyc.cs.berkeley.edu/universal/v1/tictactoe/regular/positions/?p=1_---------",
+      "type": "json",
+      "component": "API",
+      "group": "Games",
+      "sla_ms": 800,
+      "enabled": true,
+      "assert": {
+        "checks": [
+          { "kind": "http_status", "value": 200 },
+          { "kind": "json_has_keys", "keys": ["position", "positionValue", "remoteness", "moves"] },
+          { "kind": "json_path_type", "path": "$.remoteness", "type": "number" },
+          { "kind": "json_path_type", "path": "$.moves", "type": "array" },
+          { "kind": "json_path_min_length", "path": "$.moves", "value": 1 },
+          { "kind": "json_path_object_has_keys", "path": "$.moves[0]", "keys": ["move", "position", "moveValue", "remoteness"] }
+        ]
+      }
+    },
+    {
+      "id": "puzzle-hanoi",
+      "name": "Towers of Hanoi (3_3 position)",
+      "url": "https://nyc.cs.berkeley.edu/universal/v1/towersofhanoi/3_3/positions/?p=A--B--C--",
+      "type": "json",
+      "component": "API",
+      "group": "Puzzles",
+      "sla_ms": 800,
+      "enabled": true,
+      "assert": {
+        "checks": [
+          { "kind": "http_status", "value": 200 },
+          { "kind": "json_has_keys", "keys": ["position", "positionValue", "remoteness", "moves"] },
+          { "kind": "json_path_type", "path": "$.remoteness", "type": "number" },
+          { "kind": "json_path_type", "path": "$.moves", "type": "array" },
+          { "kind": "json_path_min_length", "path": "$.moves", "value": 1 },
+          { "kind": "json_path_object_has_keys", "path": "$.moves[0]", "keys": ["move", "position", "moveValue", "remoteness"] }
+        ]
+      }
+    }
+  ]
+}
