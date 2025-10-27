@@ -1,0 +1,29 @@
+{
+  "name": "gamesmanstatus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Independent uptime/latency monitor for GamesmanUni with a simple status API and dashboard.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18.18 <22"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc --noEmit false",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"(add ESLint later)\""
+  },
+  "dependencies": {
+    "fastify": "^4.28.1",
+    "better-sqlite3": "^9.6.0",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}
