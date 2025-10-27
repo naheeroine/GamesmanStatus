@@ -6,6 +6,7 @@ import "dotenv/config";
 import Fastify from "fastify";
 import { registerHealthRoutes } from "./api/health.controller.js";
 import { startScheduler } from "./scheduler/index.js";
+import { runProbe } from "./probe/runner.js";
 
 const app = Fastify({ logger: true });
 
@@ -13,7 +14,9 @@ const app = Fastify({ logger: true });
 const startedAt = Date.now();
 let lastHeartbeat = startedAt;
 const getHeartbeat = () => lastHeartbeat;
-const setHeartbeat = () => { lastHeartbeat = Date.now(); };
+const setHeartbeat = () => {
+  lastHeartbeat = Date.now();
+};
 
 // register routes
 registerHealthRoutes(app, { startedAt, getHeartbeat });
@@ -28,18 +31,22 @@ async function main() {
     await app.listen({ port: PORT, host: HOST });
     app.log.info({ port: PORT }, "GamesmanStatus API up");
 
-    // start the background scheduler (5 min ± 20s)
+    // start the background scheduler (10s for dev; change to 5 * 60 * 1000 for prod) ± 20s jitter
     const cancel = startScheduler({
       onTick: async () => {
-        // v1 heartbeat only; probes come next
+        // 1) update heartbeat
         setHeartbeat();
+
+        // 2) run a real probe
+        const result = await runProbe("https://nyc.cs.berkeley.edu/universal/v1/");
+        app.log.info(result, "probe api-root");
       },
       intervalMs: 10_000,
       jitterSeconds: 20,
       log: (msg, meta) => app.log.info(meta ?? {}, msg)
     });
 
-    // graceful shutdown
+    // shutdown
     const shutdown = async () => {
       cancel();
       await app.close();

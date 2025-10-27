@@ -16,9 +16,10 @@
     "lint": "echo \"(add ESLint later)\""
   },
   "dependencies": {
-    "fastify": "^4.28.1",
     "better-sqlite3": "^9.6.0",
     "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "undici": "^7.16.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
