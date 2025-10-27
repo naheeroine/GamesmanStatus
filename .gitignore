@@ -1,0 +1,12 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+tmp/
+.cache/
+
+# Local env/config
+.env
+.env.*
