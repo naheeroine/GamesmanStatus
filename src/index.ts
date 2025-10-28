@@ -12,8 +12,22 @@ import { loadProbes, type ProbeDef } from "./config/probes.js";
 import { getDb, ensureSchema, insertResults, type RawResultRow } from "./db/client.js";
 import { registerSummaryRoutes } from "./api/summary.controller.js";
 import { registerHistoryRoutes } from "./api/history.controller.js";
+import fastifyStatic from "@fastify/static";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
 
 const app = Fastify({ logger: true });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+// Serve UI at /
+app.register(fastifyStatic, {
+  root: join(__dirname, "../public"),
+  prefix: "/",                 // open http://localhost:8080/
+  index: ["index.html"],
+});
 
 // heartbeat (will be updated by the scheduler)
 const startedAt = Date.now();

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GamesmanStatus</title>
+  <style>
+    :root{
+      --green:#10B981; --green-100:#DCFCE7;
+      --amber:#F59E0B; --amber-100:#FEF3C7;
+      --red:#EF4444;   --red-100:#FEE2E2;
+      --gray:#9CA3AF;  --gray-200:#E5E7EB; --gray-100:#F3F4F6;
+      --fg:#111827; --muted:#6B7280; --card:#fff; --bg:#F9FAFB;
+      --bar-w:8px; --bar-h:18px; --bar-gap:4px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--fg)}
+    .wrap{max-width:980px; margin:32px auto; padding:0 16px}
+    .banner{background:var(--green-100); color:#065F46; border:1px solid #A7F3D0; padding:14px 16px; border-radius:10px; font-weight:600; display:flex; align-items:center; gap:10px}
+    .banner.degraded{background:var(--amber-100); color:#78350F; border-color:#FDE68A}
+    .banner.down{background:var(--red-100); color:#7F1D1D; border-color:#FCA5A5}
+    .dot{width:10px; height:10px; border-radius:50%}
+    .dot.ok{background:var(--green)}
+    .dot.degraded{background:var(--amber)}
+    .dot.down{background:var(--red)}
+    h2{margin:22px 0 8px 0; font-size:18px; color:#111}
+    .panel{background:var(--card); border:1px solid var(--gray-200); border-radius:12px; padding:8px}
+    .row{display:grid; grid-template-columns: 220px 1fr 120px; align-items:center; gap:10px; padding:12px 8px; border-top:1px solid var(--gray-100)}
+    .row:first-child{border-top:none}
+    .name{display:flex; align-items:center; gap:8px; font-weight:600}
+    .uptime{justify-self:end; color:var(--muted); font-size:14px}
+    .bars{display:flex; flex-wrap:wrap; gap:var(--bar-gap)}
+    .bar{width:var(--bar-w); height:var(--bar-h); border-radius:4px; background:var(--gray-200)}
+    .bar.ok{background:var(--green)}
+    .bar.degraded{background:var(--amber)}
+    .bar.down{background:var(--red)}
+    .bar.none{background:var(--gray-200)}
+    .updated{margin-top:8px; color:var(--muted); font-size:13px}
+    .legend{display:flex; gap:14px; font-size:12px; color:var(--muted); margin:8px 0 0}
+    .legend span{display:inline-flex; align-items:center; gap:6px}
+    .legend .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+    .sw.ok{background:var(--green)} .sw.degraded{background:var(--amber)} .sw.down{background:var(--red)} .sw.none{background:var(--gray-200)}
+    a,button{cursor:pointer}
+    .hdr{display:flex; justify-content:space-between; align-items:end}
+    .range{display:flex; gap:8px}
+    .chip{padding:6px 10px; border:1px solid var(--gray-200); background:#fff; border-radius:8px; font-size:12px; color:#374151}
+    .chip[aria-selected="true"]{border-color:#94A3B8; background:#F8FAFC}
+    .sr{position:absolute; left:-9999px}
+    .tooltip{position:fixed; z-index:50; background:#111; color:#fff; padding:6px 8px; border-radius:6px; font-size:12px; display:none; pointer-events:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="banner" class="banner"><span class="dot ok"></span><span id="bannerText">We’re fully operational</span></div>
+
+    <div class="hdr">
+      <h2>System status</h2>
+      <div class="range" role="tablist" aria-label="Range">
+        <button class="chip" data-days="30" aria-selected="false">30 days</button>
+        <button class="chip" data-days="60" aria-selected="false">60 days</button>
+        <button class="chip" data-days="90" aria-selected="true">90 days</button>
+      </div>
+    </div>
+    <div class="panel" id="panel"></div>
+    <div class="legend">
+      <span><i class="sw ok"></i> OK</span>
+      <span><i class="sw degraded"></i> Degraded</span>
+      <span><i class="sw down"></i> Down</span>
+      <span><i class="sw none"></i> No data</span>
+    </div>
+    <div class="updated" id="updated"></div>
+  </div>
+
+  <div id="tt" class="tooltip" role="tooltip" aria-hidden="true"></div>
+
+  <script>
+    // Simple SLA map: HTML vs JSON
+    const SLA_MS_BY_ID = {
+      homepage: 1500, // HTML
+      "api-root": 800,
+      "game-ttt": 800,
+      "puzzle-hanoi": 800
+    };
+
+    const banner = document.getElementById("banner");
+    const bannerText = document.getElementById("bannerText");
+    const panel = document.getElementById("panel");
+    const updated = document.getElementById("updated");
+    const tooltip = document.getElementById("tt");
+
+    // tiny tooltip helper
+    function showTip(html, x, y){
+      tooltip.innerHTML = html;
+      tooltip.style.left = (x + 12) + "px";
+      tooltip.style.top = (y + 12) + "px";
+      tooltip.style.display = "block";
+      tooltip.setAttribute("aria-hidden","false");
+    }
+    function hideTip(){
+      tooltip.style.display = "none";
+      tooltip.setAttribute("aria-hidden","true");
+    }
+
+    // Map bucket → color
+    function colorForBucket(id, b){
+      if (!b || b.sample_count === 0) return "none";
+      if (b.down > 0) return "down";
+      const sla = SLA_MS_BY_ID[id] ?? 1000;
+      if (b.p95_latency_ms != null && b.p95_latency_ms > sla) return "degraded";
+      return "ok";
+    }
+
+    function formatUptime(buckets){
+      let ok=0, down=0;
+      for (const b of buckets){ ok += b.ok||0; down += b.down||0; }
+      const total = ok + down;
+      if (!total) return "—";
+      const pct = (ok/total)*100;
+      return pct.toFixed(2) + "% uptime";
+    }
+
+    async function load(days=90){
+      // summary
+      const sres = await fetch("/v1/summary");
+      const summary = await sres.json();
+
+      // banner from overall
+      const overall = summary.overall_status;
+      banner.classList.remove("degraded","down");
+      const dot = banner.querySelector(".dot");
+      dot.classList.remove("degraded","down","ok");
+      if (overall === "ok"){
+        dot.classList.add("ok");
+        bannerText.textContent = "We’re fully operational";
+      } else {
+        const cls = overall === "degraded" ? "degraded":"down";
+        banner.classList.add(cls);
+        dot.classList.add(cls);
+        bannerText.textContent = overall === "degraded" ? "Partial degradation detected" : "Service disruption";
+      }
+
+      // rows
+      panel.innerHTML = "";
+      for (const p of summary.probes){
+        const id = p.id;
+
+        // fetch daily history for this component
+        const hres = await fetch(`/v1/history?component=${encodeURIComponent(id)}&days=${days}`);
+        const hist = await hres.json();
+        // Ensure exactly N bars (pad from the left with "none")
+        const N = days;
+        let bars = hist.buckets || [];
+        if (bars.length < N){
+          const pad = Array.from({length: N - bars.length}, () => ({sample_count:0, ok:0, down:0, p95_latency_ms:null, window_start:null}));
+          bars = pad.concat(bars);
+        } else if (bars.length > N){
+          bars = bars.slice(bars.length - N);
+        }
+
+        // row element
+        const row = document.createElement("div");
+        row.className = "row";
+        const name = document.createElement("div");
+        name.className = "name";
+        name.innerHTML = `<span class="dot ${p.current_status}"></span><span>${id}</span>`;
+
+        const barsEl = document.createElement("div");
+        barsEl.className = "bars";
+        for (const b of bars){
+          const div = document.createElement("div");
+          const color = colorForBucket(id, b);
+          div.className = `bar ${color}`;
+          // tooltip content
+          const dateStr = b.window_start ? new Date(b.window_start).toDateString() : "No data";
+          const tip = `
+            <div><strong>${id}</strong></div>
+            <div>${dateStr}</div>
+            <div style="opacity:.8">ok: ${b.ok ?? 0} · down: ${b.down ?? 0} · p95: ${b.p95_latency_ms ?? "—"} ms</div>
+          `;
+          div.addEventListener("mouseenter", (e)=>showTip(tip, e.clientX, e.clientY));
+          div.addEventListener("mouseleave", hideTip);
+          div.addEventListener("mousemove", (e)=>showTip(tip, e.clientX, e.clientY));
+          barsEl.appendChild(div);
+        }
+
+        const uptime = document.createElement("div");
+        uptime.className = "uptime";
+        uptime.textContent = formatUptime(hist.buckets||[]);
+
+        row.appendChild(name);
+        row.appendChild(barsEl);
+        row.appendChild(uptime);
+        panel.appendChild(row);
+      }
+
+      updated.textContent = "Last updated: " + new Date(summary.generated_at).toLocaleString();
+    }
+
+    // range chips
+    document.querySelectorAll(".chip").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        document.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-selected","false"));
+        btn.setAttribute("aria-selected","true");
+        await load(Number(btn.dataset.days));
+      });
+    });
+
+    // initial + auto refresh
+    load(90);
+    setInterval(()=> {
+      const sel = document.querySelector(".chip[aria-selected='true']");
+      load(Number(sel?.dataset.days ?? 90));
+    }, 60_000);
+  </script>
+</body>
+</html>
