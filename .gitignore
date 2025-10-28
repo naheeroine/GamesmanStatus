@@ -13,3 +13,8 @@ tmp/
 
 # Dependencies
 node_modules/
+
+# Database
+data/*.sqlite
+data/*.sqlite3
+
