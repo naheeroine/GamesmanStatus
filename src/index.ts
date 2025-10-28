@@ -11,6 +11,7 @@ import { runProbe } from "./probe/runner.js";
 import { loadProbes, type ProbeDef } from "./config/probes.js";
 import { getDb, ensureSchema, insertResults, type RawResultRow } from "./db/client.js";
 import { registerSummaryRoutes } from "./api/summary.controller.js";
+import { registerHistoryRoutes } from "./api/history.controller.js";
 
 const app = Fastify({ logger: true });
 
@@ -23,6 +24,8 @@ const setHeartbeat = () => { lastHeartbeat = Date.now(); };
 // register routes
 registerHealthRoutes(app, { startedAt, getHeartbeat });
 registerSummaryRoutes(app);
+registerHistoryRoutes(app);
+
 
 
 // server config
